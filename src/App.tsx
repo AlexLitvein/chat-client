@@ -1,22 +1,38 @@
-import React, { useEffect, useState } from "react";
+import React, { ChangeEvent, useEffect, useState } from "react";
 import "./App.css";
 import { io } from "socket.io-client";
 import { createMsg, IMessage } from "./types";
 import { MessagePanel } from "./messagePanel";
 
 export const url: string = process.env.REACT_APP_WS_URL || "";
+const socket = io(url, { autoConnect: false });
 
-// export const socket = io("ws://localhost:3333", {
-export const socket = io(url, {
-  auth: {
-    token:
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzM5MzcxMGE2Y2E1MTBlMzZmZGQ4OTQiLCJpYXQiOjE2NjUyOTkzNTYsImV4cCI6MTY2NTg5OTI5Nn0.eKJcXhJOcT6VpkMwLtxvYHzq-Xxl8eR3arkYSwKjATQ",
-  },
-});
+// INFO: если нужно подключться сразу
+// const socket = io(url, {
+//   auth: {
+//     token:
+//       "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzM5MzcxMGE2Y2E1MTBlMzZmZGQ4OTQiLCJpYXQiOjE2NjUyOTkzNTYsImV4cCI6MTY2NTg5OTI5Nn0.eKJcXhJOcT6VpkMwLtxvYHzq-Xxl8eR3arkYSwKjATQ",
+//   },
+// });
 
 function App() {
   let [msgs, set_msgs] = useState([] as IMessage[]);
-  let [connected, set_connected] = useState(false);
+  let [token, set_token] = useState(
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2MzM5MzcxMGE2Y2E1MTBlMzZmZGQ4OTQiLCJpYXQiOjE2NjUyOTkzNTYsImV4cCI6MTY2NTg5OTI5Nn0.eKJcXhJOcT6VpkMwLtxvYHzq-Xxl8eR3arkYSwKjATQ"
+  );
+
+  const onTokenChange = (event: ChangeEvent<HTMLInputElement>) => {
+    set_token(event.target.value);
+  };
+
+  const connect = () => {
+    socket.auth = { token: token };
+    socket.connect();
+  };
+
+  const disconnect = () => {
+    socket.disconnect();
+  };
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -52,6 +68,10 @@ function App() {
 
   return (
     <div className="App">
+      <p>Токен</p>
+      <input style={{ width: "100%" }} value={token} onChange={onTokenChange} />
+      <button onClick={connect}>Connect</button>
+      <button onClick={disconnect}>Disconnect</button>
       <div style={{ display: "flex", border: "1px solid red" }}>
         <div
           style={{
@@ -70,7 +90,7 @@ function App() {
             ))}
           </ul>
         </div>
-        <MessagePanel />
+        <MessagePanel socket={socket} />
       </div>
     </div>
   );

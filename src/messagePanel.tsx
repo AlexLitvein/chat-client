@@ -1,10 +1,12 @@
 import React, { useState, ChangeEvent } from "react";
-import { socket } from "./App";
+import { Socket } from "socket.io-client";
 import { createMsg, IMessage } from "./types";
 
-export interface IMessagePanelProps {}
+export interface IMessagePanelProps {
+  socket: Socket;
+}
 
-export const MessagePanel = ({}: IMessagePanelProps) => {
+export const MessagePanel = ({ socket }: IMessagePanelProps) => {
   let [msg, set_msg] = useState({
     userId: "63393710a6ca510e36fdd894",
     documentId: "63415b42ad7aec6fdf8ffd64",
